@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import br.com.roupaspet.dtos.request.product.SaveProductDTO;
+import br.com.roupaspet.dtos.request.product.UpdateProductDTO;
+
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -22,9 +25,10 @@ public class Product {
   private Long id;
   private String name;
   private String description;
-  private double price;
+  private Double price;
   private String image;
-  private Double stock;
+  private Long stock;
+  private Boolean isActive = true;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id")
   private Category category;
@@ -32,4 +36,38 @@ public class Product {
   private LocalDateTime createdAt;
   @UpdateTimestamp
   private LocalDateTime updatedAt;
+
+  public Product(SaveProductDTO dto, Category category) {
+    this.name = dto.name();
+    this.description = dto.description();
+    this.price = dto.price();
+    this.image = dto.image();
+    this.stock = dto.stock();
+    this.category = category;
+  }
+
+  public void update(UpdateProductDTO dto) {
+    if (dto.name() != null) {
+      this.name = dto.name();
+    }
+    if (dto.description() != null) {
+      this.description = dto.description();
+    }
+    if (dto.price() != null) {
+      this.price = dto.price();
+    }
+    if (dto.image() != null) {
+      this.image = dto.image();
+    }
+    if (dto.stock() != null) {
+      this.stock = dto.stock();
+    }
+    if (dto.isActive() != null) {
+      this.isActive = dto.isActive();
+    }
+  }
+
+  public void deleteLogical() {
+    this.isActive = false;
+  }
 }
