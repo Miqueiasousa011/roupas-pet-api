@@ -25,16 +25,15 @@ public class ToDoController {
 
     @GetMapping
     public ResponseEntity<List<ToDoResponseDTO>> getAll(HttpServletRequest request) {
-        var user = getUserFromTokenHelper.getUserIdFromToken(request);
+        var user = getUserFromTokenHelper.getUserFromToken(request);
         var dtos = toDoService.getAll(user);
 
         return ResponseEntity.ok(dtos);
     }
 
-
     @PostMapping
     public ResponseEntity<Object> save(@RequestBody ToDoRequestDTO dto, HttpServletRequest request) {
-        var user = getUserFromTokenHelper.getUserIdFromToken(request);
+        var user = getUserFromTokenHelper.getUserFromToken(request);
         var todo = toDoService.save(dto, user);
 
         var uri = ServletUriComponentsBuilder.fromCurrentRequest()

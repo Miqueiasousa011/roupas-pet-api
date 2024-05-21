@@ -16,10 +16,9 @@ public class GetUserFromTokenHelper {
         this.userRepository = userRepository;
     }
 
-    public User getUserIdFromToken(HttpServletRequest request) {
+    public User getUserFromToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         String userEmail = null;
-
 
         if (authHeader != null && authHeader.contains("Bearer ")) {
             var jwtToken = authHeader.replace("Bearer ", "");

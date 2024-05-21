@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
 
+import br.com.roupaspet.dtos.request.order.SaveOrderDTO;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -30,6 +32,10 @@ public class Order {
 
     @OneToMany(mappedBy = "id.order")
     private Set<OrderItem> items = new HashSet<>();
+
+    public Double getTotal() {
+        return items.stream().mapToDouble(OrderItem::getSubTotal).sum();
+    }
 
     public enum OrderStatus {
         PENDING, DELIVERED, CANCELED
