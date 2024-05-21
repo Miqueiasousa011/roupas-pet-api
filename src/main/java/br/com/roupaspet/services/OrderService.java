@@ -5,16 +5,14 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
-import br.com.roupaspet.dtos.request.category.SaveCategoryDTO;
-import br.com.roupaspet.dtos.request.category.UpdateCategoryDTO;
 import br.com.roupaspet.dtos.request.order.SaveOrderDTO;
-import br.com.roupaspet.dtos.response.CategoryResponseDTO;
+import br.com.roupaspet.dtos.request.order.UpdateOrderDTO;
 import br.com.roupaspet.dtos.response.order.OrderResponseDTO;
-import br.com.roupaspet.models.Category;
 import br.com.roupaspet.models.Order;
 import br.com.roupaspet.models.OrderItem;
 import br.com.roupaspet.models.Product;
 import br.com.roupaspet.models.User;
+import br.com.roupaspet.repositories.OrderItemRepository;
 import br.com.roupaspet.repositories.OrderRepository;
 import br.com.roupaspet.repositories.ProductRepository;
 import br.com.roupaspet.services.exceptions.APIException;
@@ -24,10 +22,16 @@ import jakarta.transaction.Transactional;
 public class OrderService {
   private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
+  private final OrderItemRepository orderItemRepository;
 
-  public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+  public OrderService(
+      OrderRepository orderRepository,
+      ProductRepository productRepository,
+      OrderItemRepository orderItemRepository //
+  ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
+    this.orderItemRepository = orderItemRepository;
   }
 
   @Transactional
@@ -44,60 +48,40 @@ public class OrderService {
       throw new APIException("error");
     }
 
-    // obj.setId(null);
-    // obj.setInstante(new Date());
-    // obj.setCliente(clienteService.find(obj.getCliente().getId()));
-    // obj.getPagamento().setEstado(EstadoPagamento.PENDENTE);
-    // obj.getPagamento().setPedido(obj);
-    // if (obj.getPagamento() instanceof PagamentoComBoleto) {
-    // PagamentoComBoleto pagto = (PagamentoComBoleto) obj.getPagamento();
-    // boletoService.preencherPagamentoComBoleto(pagto, obj.getInstante());
-    // }
+    var newOrder = new Order();
 
-    // obj = repo.save(obj);
-    // pagamentoRepository.save(obj.getPagamento());
-    // for (ItemPedido ip : obj.getItens()) {
-    // ip.setDesconto(0.0);
-    // ip.setProduto(produtoService.find(ip.getProduto().getId()));
-    // ip.setPreco(ip.getProduto().getPreco());
-    // ip.setPedido(obj);
-    // }
-    // itemPedidoRepository.saveAll(obj.getItens());
-
-    var order = new Order();
-
-    order.setUser(user);
-    order.setPaymentMethod(dto.paymentMethod());
-    order.setStatus(Order.OrderStatus.PENDING);
+    newOrder.setUser(user);
+    newOrder.setPaymentMethod(dto.paymentMethod());
+    newOrder.setStatus(Order.OrderStatus.PENDING);
 
     dto.items().forEach(item -> {
       var product = productRepository.getReferenceById(item.productId());
 
       hasStock(product, item.quantity());
 
-      order.getItems().add(new OrderItem(order, product, item.quantity(), product.getPrice() * item.quantity()));
+      var ordemItem = new OrderItem(newOrder, product, item.quantity(), product.getPrice() * item.quantity());
+      newOrder.getItems().add(ordemItem);
 
       updateStock(product, item.quantity());
     });
 
-    var orderCreated = orderRepository.save(order);
+    var orderCreated = orderRepository.save(newOrder);
+    orderItemRepository.saveAll(orderCreated.getItems());
 
     return new OrderResponseDTO(orderCreated);
   }
 
-  // @Transactional
-  // public CategoryResponseDTO update(UpdateCategoryDTO dto, Long id) {
-  // var category = categoryRepository.getReferenceById(id);
-  // category.update(dto);
+  @Transactional
+  public OrderResponseDTO update(UpdateOrderDTO dto, Long id) {
+    if (Objects.isNull(dto) || Objects.isNull(id)) {
+      throw new APIException("error");
+    }
 
-  // return new CategoryResponseDTO(category);
-  // }
+    var order = orderRepository.getReferenceById(id);
+    order.update(dto);
 
-  // @Transactional
-  // public void logicalDelete(Long id) {
-  // var todo = categoryRepository.getReferenceById(id);
-  // todo.deleteLogical();
-  // }
+    return new OrderResponseDTO(order);
+  }
 
   private void updateStock(Product product, Integer quantity) {
     product.setStock(product.getStock() - quantity);

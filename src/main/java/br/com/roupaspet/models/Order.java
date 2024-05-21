@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
 
-import br.com.roupaspet.dtos.request.order.SaveOrderDTO;
+import br.com.roupaspet.dtos.request.order.UpdateOrderDTO;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,6 +35,10 @@ public class Order {
 
     public Double getTotal() {
         return items.stream().mapToDouble(OrderItem::getSubTotal).sum();
+    }
+
+    public void update(UpdateOrderDTO dto) {
+        this.status = dto.status();
     }
 
     public enum OrderStatus {
