@@ -53,6 +53,7 @@ public class OrderService {
     newOrder.setUser(user);
     newOrder.setPaymentMethod(dto.paymentMethod());
     newOrder.setStatus(Order.OrderStatus.PENDING);
+    newOrder.setShippingCost(dto.shippingCost());
 
     dto.items().forEach(item -> {
       var product = productRepository.getReferenceById(item.productId());

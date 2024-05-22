@@ -1,5 +1,10 @@
 package br.com.roupaspet.models;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.EmbeddedId;
@@ -19,6 +24,11 @@ public class OrderItem {
 
   private Integer quantity;
   private Double price;
+
+  @CreationTimestamp
+  private LocalDateTime createdAt;
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
 
   public OrderItem(Order order, Product product, Integer quantity, Double price) {
     this.id.setOrder(order);

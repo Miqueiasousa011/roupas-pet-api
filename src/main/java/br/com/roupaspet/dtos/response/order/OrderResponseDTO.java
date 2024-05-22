@@ -8,6 +8,7 @@ public record OrderResponseDTO(
         Long id,
         String paymentMethod,
         List<OrderItemResponseDTO> items,
+        Double shippingCost,
         Double total,
         String status //
 ) {
@@ -16,6 +17,7 @@ public record OrderResponseDTO(
                 order.getId(),
                 order.getPaymentMethod().name(),
                 order.getItems().stream().map(OrderItemResponseDTO::new).toList(),
+                order.getShippingCost(),
                 order.getTotal(),
                 order.getStatus().name() //
         );
